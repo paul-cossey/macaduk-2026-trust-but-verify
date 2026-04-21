@@ -1,0 +1,45 @@
+[flake8]
+# Maximum line length
+max-line-length = 120
+
+# Maximum complexity (cognitive complexity limit)
+max-complexity = 15
+
+# Ignore specific errors/warnings
+ignore =
+    # E203: whitespace before ':' (conflicts with black)
+    E203,
+    # W503: line break before binary operator (PEP 8 updated)
+    W503,
+    # E501: line too long (handled by max-line-length)
+    E501
+
+# Exclude directories
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    .eggs,
+    *.egg,
+    build,
+    dist,
+    src/utils/scratch/
+
+# Count errors
+count = True
+
+# Show source code for errors
+show-source = True
+
+# Show statistics
+statistics = True
+
+# File patterns to check
+filename =
+    *.py
+
+# Per-file ignores (if needed)
+per-file-ignores =
+    __init__.py:F401

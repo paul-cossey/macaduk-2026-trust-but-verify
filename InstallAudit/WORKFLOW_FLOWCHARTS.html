@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoUpdateTester Workflow Flowcharts</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @media print {
+            .page-break {
+                page-break-before: always;
+            }
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+        }
+
+        h3 {
+            color: #7f8c8d;
+        }
+
+        .toc {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .diagram-container {
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .description {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+
+        .features {
+            background-color: #e8f8e8;
+            padding: 15px;
+            border-left: 4px solid #27ae60;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+
+        ul {
+            margin: 10px 0;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .summary {
+            background-color: #fff9e6;
+            padding: 20px;
+            border: 2px solid #f39c12;
+            border-radius: 5px;
+            margin: 30px 0;
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 AutoUpdateTester Workflow Flowcharts</h1>
+
+        <div class="description">
+            <p><strong>Document Purpose:</strong> This document contains comprehensive flowcharts for all major workflows in the AutoUpdateTester system. Each flowchart visualizes the decision points, process flows, and interactions between different components of the system.</p>
+        </div>
+
+        <div class="toc">
+            <h2>📋 Table of Contents</h2>
+            <ul>
+                <li><a href="#workflow-1">1. Main Entry Point Workflow</a></li>
+                <li><a href="#workflow-2">2. Manual Installation Workflow</a></li>
+                <li><a href="#workflow-3">3. Munki Local Install Workflow</a></li>
+                <li><a href="#workflow-4">4. Profile Generation - Analyze & Generate Workflow</a></li>
+                <li><a href="#workflow-5">5. Manual Profile Generation Workflow</a></li>
+                <li><a href="#workflow-6">6. Manual PPPC Profile Generation</a></li>
+                <li><a href="#workflow-7">7. Enhanced Profile Generation with System Data</a></li>
+                <li><a href="#workflow-8">8. Extension Attribute Generation Workflow</a></li>
+                <li><a href="#workflow-9">9. Generate Enhanced Profiles Workflow (Munki)</a></li>
+                <li><a href="#workflow-10">10. Setup Tester and Catalog Workflow</a></li>
+                <li><a href="#workflow-11">11. Select Item from Catalog Workflow</a></li>
+                <li><a href="#workflow-12">12. Generate EA and Recipe Workflow</a></li>
+            </ul>
+        </div>
+
+        <!-- Workflow 1 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-1">1. Main Entry Point Workflow</h2>
+        <div class="description">
+            <p>This flowchart shows how the script determines which installation method to use and routes to the appropriate workflow.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([Start Main Entry]) --> CheckRoot{Running as Root?}
+    CheckRoot -->|No| ExitRoot[Exit: Must run as root]
+    CheckRoot -->|Yes| GetConfig[Get Installation Method from Config]
+    GetConfig --> DisplayMethod[Display Installation Method]
+    DisplayMethod --> CheckMethod{Installation Method}
+    CheckMethod -->|munki_standard| NotImplemented[Display: Not Implemented<br/>Exit]
+    CheckMethod -->|manual| PromptLookback[Prompt Log Lookback Period]
+    CheckMethod -->|munki_local| PromptLookback
+    CheckMethod -->|unknown| UnknownMethod[Display: Unknown Method<br/>Exit]
+    PromptLookback --> UpdateLookback[Update Log Lookback Period]
+    UpdateLookback --> RouteMethod{Route by Method}
+    RouteMethod -->|manual| ManualWorkflow[Call main_manual_install]
+    RouteMethod -->|munki_local| MunkiWorkflow[Call main_munki_local_install]
+    ManualWorkflow --> End([End])
+    MunkiWorkflow --> End
+            </div>
+        </div>
+        <div class="features">
+            <strong>Key Decision Points:</strong>
+            <ul>
+                <li><strong>Root check:</strong> Ensures script has proper privileges</li>
+                <li><strong>Installation method:</strong> Routes to manual or Munki workflow</li>
+                <li><strong>munki_standard:</strong> Not yet implemented</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 2 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-2">2. Manual Installation Workflow</h2>
+        <div class="description">
+            <p>Complete workflow for manual user-driven installations where the user installs the application themselves while the script monitors and generates profiles.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([Start Manual Install]) --> InitComponents[Initialize All Components:<br/>- ManualInstaller<br/>- SecurityMonitoring<br/>- AppAnalyzer<br/>- ProfileGenerator<br/>- ReportGenerator]
+    InitComponents --> CreateTester[Create ManualCompositeTester Instance]
+    CreateTester --> GetSystemInfo[Get System Info]
+    GetSystemInfo --> GetSaveLocation[Prompt User for Save Location]
+    GetSaveLocation --> RunManualInstall[Run manual_install_and_test]
+    RunManualInstall --> SystemComparison[System State Comparison<br/>Inside manual_install_and_test]
+    SystemComparison --> ProfileGen[Configuration Profile Generation]
+    ProfileGen --> DragDropApps[Prompt: Drag & Drop Apps<br/>for Analysis]
+    DragDropApps --> CheckMoreApps{More Apps to Analyze?}
+    CheckMoreApps -->|Yes| AnalyzeApp[Analyze Application]
+    AnalyzeApp --> GenerateProfiles[Generate Profiles from Analysis]
+    GenerateProfiles --> DragDropApps
+    CheckMoreApps -->|No| ManualProfilePrompt[Prompt Manual Profile Generation]
+    ManualProfilePrompt --> CheckManualProfile{Generate Manual Profiles?}
+    CheckManualProfile -->|Yes| SelectProfileType[Select Profile Type:<br/>PPPC, Notifications, SysExt, etc.]
+    SelectProfileType --> GenerateManual[Generate Manual Profile]
+    GenerateManual --> SaveManual[Save Manual Profile]
+    SaveManual --> CheckMoreManual{More Manual Profiles?}
+    CheckMoreManual -->|Yes| SelectProfileType
+    CheckMoreManual -->|No| EAPrompt[Prompt EA Generation]
+    CheckManualProfile -->|No| EAPrompt
+    EAPrompt --> CheckEA{Generate EA?}
+    CheckEA -->|Yes| SelectEAType[Select EA Type:<br/>PKG Receipt or App Bundle]
+    SelectEAType --> GenerateEA[Generate EA Script]
+    GenerateEA --> DisplayCompletion
+    CheckEA -->|No| DisplayCompletion[Display: Manual uninstall required<br/>Test completed]
+    DisplayCompletion --> GenerateReport[Generate Final Report]
+    GenerateReport --> SaveReport[Save Report to Output Folder]
+    SaveReport --> End([End])
+            </div>
+        </div>
+        <div class="features">
+            <strong>Key Features:</strong>
+            <ul>
+                <li>User manually installs the application</li>
+                <li>System state is captured before and after</li>
+                <li>Drag & drop interface for app analysis</li>
+                <li>Optional manual profile generation</li>
+                <li>Extension Attribute generation</li>
+                <li>Requires manual uninstallation</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 3 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-3">3. Munki Local Install Workflow</h2>
+        <div class="description">
+            <p>Full automated workflow for Munki-managed installations, including install/test/uninstall cycle with automated profile generation.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([Start Munki Local Install]) --> ResetManifest[Reset Munki Manifest:<br/>Delete if exists]
+    ResetManifest --> SetupTester[Setup Tester & Catalog:<br/>- Create CompositeTester<br/>- Initial catalog update<br/>- Catalog selection]
+    SetupTester --> GetSaveLocation[Prompt User for Save Location]
+    GetSaveLocation --> SelectItem[Select Item from Catalog:<br/>- Update catalog<br/>- Display items<br/>- User selects item]
+    SelectItem --> PromptInstall[Prompt: Ready to Install?]
+    PromptInstall --> InstallTest[install_and_test:<br/>- Add to manifest<br/>- Run managedsoftwareupdate<br/>- Monitor security events]
+    InstallTest --> CheckInstall{Install Successful?}
+    CheckInstall -->|Yes| InstallSuccess[Record Success]
+    CheckInstall -->|No| InstallFail[Record Failure]
+    InstallSuccess --> CompareSystem[Compare System States:<br/>- Notifications<br/>- System Extensions<br/>- Launch Items]
+    InstallFail --> CompareSystem
+    CompareSystem --> EnhancedProfiles[Generate Enhanced Profiles Workflow]
+    EnhancedProfiles --> GenerateEA[Generate Extension Attribute]
+    GenerateEA --> PromptUninstall[Prompt: Ready to Uninstall?]
+    PromptUninstall --> Uninstall[uninstall_app:<br/>- Remove from manifest<br/>- Run managedsoftwareupdate --remove]
+    Uninstall --> CheckUninstall{Uninstall Successful?}
+    CheckUninstall -->|Yes| UninstallSuccess[Record Success]
+    CheckUninstall -->|No| UninstallFail[Record Failure]
+    UninstallSuccess --> RestoreTools[Restore Security Tool States]
+    UninstallFail --> RestoreTools
+    RestoreTools --> ManualProfilePrompt[Prompt Manual Profile Generation]
+    ManualProfilePrompt --> CheckManual{Generate Manual?}
+    CheckManual -->|Yes| GenerateManual[Generate Manual Profiles]
+    GenerateManual --> FinalReport
+    CheckManual -->|No| FinalReport[Generate & Save Final Report]
+    FinalReport --> End([End])
+
+    style CheckInstall fill:#ffeb9c
+    style CheckUninstall fill:#ffeb9c
+    style CheckManual fill:#d5e8d4
+            </div>
+        </div>
+        <div class="features">
+            <strong>Key Features:</strong>
+            <ul>
+                <li>Automated Munki-based installation</li>
+                <li>System state comparison for profile generation</li>
+                <li>Extension Attribute generation</li>
+                <li>Automated uninstallation</li>
+                <li>Security tool state restoration</li>
+                <li>Optional manual profile generation</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 4 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-4">4. Profile Generation - Analyze & Generate Workflow</h2>
+        <div class="description">
+            <p>Details how applications are analyzed and configuration profiles are automatically generated from the analysis.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([analyze_and_generate_profiles]) --> CheckAppPath{App Path Provided?}
+    CheckAppPath -->|No| FindApp[Find Application Path]
+    FindApp --> CheckFound{App Found?}
+    CheckFound -->|No| ReturnEmpty[Return Empty List]
+    CheckAppPath -->|Yes| AnalyzeApp[Analyze Application:<br/>- Code signing<br/>- Binaries<br/>- Components]
+    CheckFound -->|Yes| AnalyzeApp
+    AnalyzeApp --> CheckAnalysis{Analysis Successful?}
+    CheckAnalysis -->|No| Warn[Log Warning]
+    Warn --> ReturnEmpty
+    CheckAnalysis -->|Yes| GenerateProfiles[Generate Profiles from Analysis:<br/>- PPPC<br/>- Screen Recording<br/>- System Extensions]
+    GenerateProfiles --> CheckProfiles{Profiles Generated?}
+    CheckProfiles -->|No| LogNoProfiles[Log: No profiles needed]
+    LogNoProfiles --> ReturnEmpty
+    CheckProfiles -->|Yes| LogGenerated[Log: Generated N profiles]
+    LogGenerated --> CheckBundleTeam{Bundle ID & Team ID Available?}
+    CheckBundleTeam -->|Yes| EnhanceProfiles[Enhance with System Data:<br/>- BTM login items<br/>- Launch agents<br/>- System state changes]
+    CheckBundleTeam -->|No| Return[Return Profiles]
+    EnhanceProfiles --> CheckEnhanced{Enhanced Profiles Created?}
+    CheckEnhanced -->|Yes| LogEnhanced[Log: Enhanced N profiles]
+    LogEnhanced --> ExtendList[Extend Profile List]
+    ExtendList --> Return
+    CheckEnhanced -->|No| Return
+    Return --> End([Return Profile List])
+
+    style CheckAnalysis fill:#ffeb9c
+    style CheckProfiles fill:#d5e8d4
+    style CheckEnhanced fill:#d5e8d4
+            </div>
+        </div>
+        <div class="features">
+            <strong>Key Components:</strong>
+            <ul>
+                <li>Application path discovery</li>
+                <li>Code signing analysis</li>
+                <li>Profile type detection (PPPC, System Extensions, etc.)</li>
+                <li>Enhancement with system-level data</li>
+                <li>BTM (Background Task Management) integration</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 5 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-5">5. Manual Profile Generation Workflow</h2>
+        <div class="description">
+            <p>Interactive menu-driven process for manually generating configuration profiles when automated detection is insufficient.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([prompt_manual_profile_generation]) --> DisplayHeader[Display: Manual Profile Generation Header]
+    DisplayHeader --> PromptUser[Prompt: Generate Manual Profiles?]
+    PromptUser --> CheckResponse{User Response}
+    CheckResponse -->|No| ReturnEmpty[Return Empty List]
+    CheckResponse -->|Yes| StoreMunkiName[Store Munki Item Name & Save Location]
+    StoreMunkiName --> CreateFolder[Create Munki Folder with Permissions]
+    CreateFolder --> MenuLoop[Display Profile Type Menu:<br/>1. PPPC<br/>2. Notifications<br/>3. System Extensions<br/>4. Kernel Extensions<br/>5. Screen Recording<br/>6. Content Filter<br/>7. Managed Login Items<br/>q. Quit]
+    MenuLoop --> GetChoice[Get User Choice]
+    GetChoice --> CheckChoice{User Choice}
+    CheckChoice -->|q| ReturnProfiles[Return Generated Profiles]
+    CheckChoice -->|1-7| RouteType{Profile Type}
+    CheckChoice -->|Invalid| ShowError[Display: Invalid Selection]
+    ShowError --> MenuLoop
+
+    RouteType -->|PPPC| GenPPPC[Generate Manual PPPC Profile]
+    RouteType -->|Notifications| GenNotif[Generate Manual Notifications Profile]
+    RouteType -->|SysExt| GenSysExt[Generate Manual SysExt Profile]
+    RouteType -->|KernelExt| GenKernelExt[Generate Manual KernelExt Profile]
+    RouteType -->|ScreenRec| GenScreen[Generate Manual Screen Recording Profile]
+    RouteType -->|ContentFilter| GenFilter[Generate Manual Content Filter Profile]
+    RouteType -->|LoginItems| GenLogin[Generate Manual Login Items Profile]
+
+    GenPPPC --> AddToList[Add to Generated Profiles List]
+    GenNotif --> AddToList
+    GenSysExt --> AddToList
+    GenKernelExt --> AddToList
+    GenScreen --> AddToList
+    GenFilter --> AddToList
+    GenLogin --> AddToList
+
+    AddToList --> DisplaySuccess[Display: Profile Generated Successfully]
+    DisplaySuccess --> MenuLoop
+
+    ReturnProfiles --> End([Return Profile List])
+    ReturnEmpty --> End
+
+    style CheckChoice fill:#ffeb9c
+    style RouteType fill:#d5e8d4
+            </div>
+        </div>
+        <div class="features">
+            <strong>Profile Types Available:</strong>
+            <ol>
+                <li><strong>PPPC</strong> - Privacy Preferences Policy Control (Full Disk Access, Camera, Microphone, etc.)</li>
+                <li><strong>Notifications</strong> - Pre-authorize notification permissions</li>
+                <li><strong>System Extensions</strong> - Allow system extensions without user approval</li>
+                <li><strong>Kernel Extensions</strong> - Allow kernel extensions (legacy)</li>
+                <li><strong>Screen Recording</strong> - Grant screen recording permissions</li>
+                <li><strong>Content Filter</strong> - Network content filtering</li>
+                <li><strong>Managed Login Items</strong> - Automatically launched items at login</li>
+            </ol>
+        </div>
+
+        <!-- Workflow 6 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-6">6. Manual PPPC Profile Generation</h2>
+        <div class="description">
+            <p>Detailed workflow for creating PPPC (Privacy Preferences Policy Control) profiles with service selection and merging capabilities.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([Generate Manual PPPC Profile]) --> DisplayInfo[Display: PPPC Profile Generation Info]
+    DisplayInfo --> ShowExisting[Show Existing:<br/>- Bundle IDs<br/>- App Names<br/>- Team IDs]
+    ShowExisting --> GetBundleIDs[Get Bundle IDs:<br/>- Interactive menu OR<br/>- Manual entry]
+    GetBundleIDs --> CheckBundleIDs{Bundle IDs Provided?}
+    CheckBundleIDs -->|No| ReturnEmpty[Return Empty List]
+    CheckBundleIDs -->|Yes| GetTeamID[Get Team ID<br/>Optional, applies to all]
+    GetTeamID --> DisplayServices[Display PPPC Services:<br/>1. Camera<br/>2. Microphone<br/>3. Screen Recording<br/>4-12. Various Folder & System Access]
+    DisplayServices --> GetServices[Get Service Selection<br/>Comma-separated numbers]
+    GetServices --> CheckServices{Services Selected?}
+    CheckServices -->|No| ReturnEmpty
+    CheckServices -->|Yes| BuildRequirements[Build PPPC Requirements:<br/>For each bundle ID x service]
+    BuildRequirements --> ReadExisting[Read Existing PPPC Profile<br/>If it exists]
+    ReadExisting --> ExtractExisting[Extract Existing Requirements]
+    ExtractExisting --> MergeRequirements[Merge Requirements:<br/>Remove duplicates]
+    MergeRequirements --> CreateProfile[Create Consolidated PPPC Profile]
+    CreateProfile --> SaveProfile[Save Profile to Munki Folder]
+    SaveProfile --> ReturnProfile[Return Profile Info]
+    ReturnProfile --> End([End])
+    ReturnEmpty --> End
+
+    style CheckBundleIDs fill:#ffeb9c
+    style CheckServices fill:#ffeb9c
+            </div>
+        </div>
+        <div class="features">
+            <strong>PPPC Services:</strong>
+            <ul>
+                <li>Camera, Microphone, Screen Recording</li>
+                <li>Folder access (Documents, Desktop, Downloads)</li>
+                <li>Network & Removable Volumes</li>
+                <li>Full Disk Access</li>
+                <li>Accessibility, Automation & App Control</li>
+            </ul>
+            <strong>Features:</strong>
+            <ul>
+                <li>Multi-bundle ID support</li>
+                <li>Service selection by number</li>
+                <li>Merges with existing profiles</li>
+                <li>Prevents duplicates</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 7 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-7">7. Enhanced Profile Generation with System Data</h2>
+        <div class="description">
+            <p>Shows how profiles are enhanced with system-level data captured during installation, including BTM (Background Task Management) login items.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([enhance_profiles_with_system_data]) --> LogStart[Log: Enhancing profiles with system data]
+    LogStart --> GetBTMData[Get Current BTM Data:<br/>- From captured state<br/>- Or capture now if missing]
+    GetBTMData --> CheckBTM{BTM Data Available?}
+    CheckBTM -->|No| WarnNoBTM[Log Warning: No BTM data]
+    CheckBTM -->|Yes| LogBTMAvailable[Log: BTM data available]
+    WarnNoBTM --> GetLaunchItems
+    LogBTMAvailable --> GetLaunchItems[Get Launch Items:<br/>- Initial launch items<br/>- Current launch items]
+    GetLaunchItems --> UpdateProfiles[update_profiles_with_system_data:<br/>- Parse BTM for login items<br/>- Filter by bundle_id/team_id<br/>- Create managed login items profile]
+    UpdateProfiles --> CheckUpdated{Updated Profiles Created?}
+    CheckUpdated -->|Yes| LogUpdated[Log: Enhanced N profiles]
+    CheckUpdated -->|No| LogNoUpdates[Log: No enhancements needed]
+    LogUpdated --> SaveProfiles[Save Enhanced Profiles]
+    SaveProfiles --> LogSaved[Log: Saved profile files]
+    LogSaved --> ReturnProfiles[Return Updated Profiles]
+    LogNoUpdates --> ReturnEmpty[Return Empty List]
+    ReturnProfiles --> End([End])
+    ReturnEmpty --> End
+
+    style CheckBTM fill:#ffeb9c
+    style CheckUpdated fill:#d5e8d4
+            </div>
+        </div>
+        <div class="features">
+            <strong>Key Data Sources:</strong>
+            <ul>
+                <li><strong>BTM (Background Task Management)</strong> - macOS system for tracking login items</li>
+                <li><strong>Launch Items</strong> - Before/after comparison</li>
+                <li><strong>System Extensions</strong> - Loaded extensions</li>
+                <li><strong>Launch Agents/Daemons</strong> - Automated startup items</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 8 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-8">8. Extension Attribute Generation Workflow</h2>
+        <div class="description">
+            <p>Interactive process for generating Extension Attribute (EA) scripts to track application versions.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([prompt_manual_ea_generation]) --> DisplayHeader[Display: EA Generation Header]
+    DisplayHeader --> PromptUser[Prompt: Generate EA?]
+    PromptUser --> CheckResponse{User Response}
+    CheckResponse -->|No| ReturnNone[Return None]
+    CheckResponse -->|Yes| CreateFolder[Create Munki Folder]
+    CreateFolder --> InitGenerator[Initialize EA Generator]
+    InitGenerator --> ExtractData[Extract Available Data:<br/>- PKG Receipts<br/>- App Bundles]
+    ExtractData --> BuildOptions[Build Options Menu]
+    BuildOptions --> DisplayOptions[Display All Options:<br/>- PKG Receipt Options<br/>- App Bundle Options<br/>- Drag & Drop<br/>- Cancel]
+    DisplayOptions --> GetChoice[Get User Selection]
+    GetChoice --> CheckChoice{User Choice}
+    CheckChoice -->|Cancel| ReturnNone
+    CheckChoice -->|Invalid| ShowError[Display: Invalid Selection]
+    ShowError --> GetChoice
+    CheckChoice -->|PKG Receipt| GenReceiptEA[Generate Receipt EA]
+    CheckChoice -->|App Version| GenPlistEA[Generate Plist EA]
+    CheckChoice -->|Drag & Drop| HandleDragDrop[Handle Drag & Drop]
+
+    GenReceiptEA --> ReturnPath[Return EA Script Path]
+    GenPlistEA --> ReturnPath
+    HandleDragDrop --> CheckDragDrop{Valid App?}
+    CheckDragDrop -->|No| ShowDragError[Display Error]
+    ShowDragError --> ReturnNone
+    CheckDragDrop -->|Yes| ReturnPath
+
+    ReturnPath --> End([End])
+    ReturnNone --> End
+
+    style CheckResponse fill:#ffeb9c
+    style CheckChoice fill:#d5e8d4
+    style CheckDragDrop fill:#ffeb9c
+            </div>
+        </div>
+        <div class="features">
+            <strong>EA Types:</strong>
+            <ol>
+                <li><strong>PKG Receipt-Based</strong> - Checks installed package receipts for version</li>
+                <li><strong>CFBundleShortVersionString</strong> - Most common user-facing version</li>
+                <li><strong>CFBundleVersion</strong> - Build version number</li>
+                <li><strong>Drag & Drop</strong> - Manually specify application</li>
+            </ol>
+        </div>
+
+        <!-- Workflow 9 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-9">9. Generate Enhanced Profiles Workflow (Munki)</h2>
+        <div class="description">
+            <p>Comprehensive workflow showing how apps are collected from multiple sources and processed for enhanced profile generation in Munki installations.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([_generate_enhanced_profiles_workflow]) --> DisplayHeader[Display: Generating Enhanced Profiles]
+    DisplayHeader --> InitCollections[Initialize unique_apps Dictionary]
+    InitCollections --> CollectFromAnalyses[Collect from application_analyses]
+    CollectFromAnalyses --> CollectFromCodeSign[Collect from code_signing_results]
+    CollectFromCodeSign --> CheckSystemChanges{system_changes.login_items exist?}
+    CheckSystemChanges -->|No| ProcessApps
+    CheckSystemChanges -->|Yes| ExtractFromBTM[Extract Apps from BTM Changes]
+    ExtractFromBTM --> GroupByTeam[Group Items by Team ID]
+    GroupByTeam --> CheckTeamCoverage{Team Already Covered?}
+    CheckTeamCoverage -->|Yes| SkipTeam[Skip - Already Covered]
+    CheckTeamCoverage -->|No| AddTeamGroup[Add Team Group]
+    SkipTeam --> HandleNoTeam
+    AddTeamGroup --> LogAddedTeam[Log: Found N login items]
+    LogAddedTeam --> HandleNoTeam[Handle Items Without Team ID]
+    HandleNoTeam --> ProcessApps[Process Unique Applications]
+    ProcessApps --> CheckEmpty{unique_apps Empty?}
+    CheckEmpty -->|Yes| LogNoApps[Log: No apps found]
+    LogNoApps --> End([End])
+    CheckEmpty -->|No| LogProcessing[Log: Processing N apps]
+    LogProcessing --> IterateApps[For Each App]
+    IterateApps --> CallEnhance[Generate Enhanced Profiles]
+    CallEnhance --> CheckGenerated{Profiles Generated?}
+    CheckGenerated -->|Yes| SetFlag[Set Flag]
+    CheckGenerated -->|No| NextApp[Next App]
+    SetFlag --> NextApp
+    NextApp --> MoreApps{More Apps?}
+    MoreApps -->|Yes| IterateApps
+    MoreApps -->|No| CheckAnyGenerated{Any Generated?}
+    CheckAnyGenerated -->|Yes| End
+    CheckAnyGenerated -->|No| LogNone[Log: None generated]
+    LogNone --> End
+
+    style CheckSystemChanges fill:#d5e8d4
+    style CheckTeamCoverage fill:#ffeb9c
+    style CheckEmpty fill:#ffeb9c
+            </div>
+        </div>
+        <div class="features">
+            <strong>Smart Features:</strong>
+            <ul>
+                <li><strong>De-duplication</strong> - Prevents processing same app twice</li>
+                <li><strong>Team Grouping</strong> - Consolidates related apps by Team ID</li>
+                <li><strong>Fallback Detection</strong> - Uses BTM if no dragged apps</li>
+                <li><strong>Coverage Check</strong> - Skips team if already covered</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 10 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-10">10. Setup Tester and Catalog Workflow</h2>
+        <div class="description">
+            <p>Initialization process for the CompositeTester class and interactive catalog selection for Munki installations.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([_setup_tester_and_catalog]) --> ImportModules[Import All Necessary Modules]
+    ImportModules --> DefineClass[Define CompositeTester Class]
+    DefineClass --> CreateTemp[Create Temporary CompositeTester]
+    CreateTemp --> UpdateCatalog[Update Catalog]
+    UpdateCatalog --> CheckUpdate{Update Successful?}
+    CheckUpdate -->|No| WarnUpdate[Log Warning]
+    CheckUpdate -->|Yes| SelectCatalog
+    WarnUpdate --> SelectCatalog[Catalog Selection]
+    SelectCatalog --> CheckSelection{Catalog Selected?}
+    CheckSelection -->|No| ExitSelection[Exit: Cancelled]
+    CheckSelection -->|Yes| CreateMain[Create Main CompositeTester]
+    CreateMain --> GetSystemInfo[Get System Info]
+    GetSystemInfo --> GetSaveLocation[Prompt: Output Location]
+    GetSaveLocation --> SetOutputDir[Set output_directory]
+    SetOutputDir --> Return[Return: tester, catalog, save_location]
+    Return --> End([End])
+    ExitSelection --> End
+
+    style CheckUpdate fill:#ffeb9c
+    style CheckSelection fill:#ffeb9c
+            </div>
+        </div>
+        <div class="features">
+            <strong>CompositeTester Components:</strong>
+            <ul>
+                <li>MunkiInstaller, ManualInstaller</li>
+                <li>SecurityMonitoring, SecurityToolManager</li>
+                <li>AppAnalyzer, ProfileGenerator</li>
+                <li>ReportGenerator, SystemChecker</li>
+                <li>And more...</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 11 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-11">11. Select Item from Catalog Workflow</h2>
+        <div class="description">
+            <p>Interactive process for selecting and validating software items from the Munki catalog.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([_select_item_from_catalog]) --> UpdateCatalog[Update Selected Catalog]
+    UpdateCatalog --> CheckUpdate{Update Successful?}
+    CheckUpdate -->|No| ExitError[Exit: Unable to update]
+    CheckUpdate -->|Yes| ReadCatalog[Read Catalog Data]
+    ReadCatalog --> CheckRead{Read Successful?}
+    CheckRead -->|No| ExitReadError[Exit: Unable to read]
+    CheckRead -->|Yes| ParseItems[Parse Catalog Items]
+    ParseItems --> DisplayItems[Display Available Items]
+    DisplayItems --> PromptSelection[Prompt User]
+    PromptSelection --> GetSelection[Get User Input]
+    GetSelection --> ValidateSelection{Valid Selection?}
+    ValidateSelection -->|Invalid| ShowError[Display: Invalid Selection]
+    ShowError --> ExitInvalid[Exit]
+    ValidateSelection -->|Valid| ExtractDetails[Extract Item Details]
+    ExtractDetails --> DisplaySelected[Display Selected]
+    DisplaySelected --> AddToReport[Add to report_data]
+    AddToReport --> Return[Return Item Details]
+    Return --> End([End])
+    ExitError --> End
+    ExitReadError --> End
+    ExitInvalid --> End
+
+    style CheckUpdate fill:#ffeb9c
+    style CheckRead fill:#ffeb9c
+    style ValidateSelection fill:#ffeb9c
+            </div>
+        </div>
+        <div class="features">
+            <strong>Catalog Item Information:</strong>
+            <ul>
+                <li><strong>Name</strong> - Application or package name</li>
+                <li><strong>Version</strong> - Version number</li>
+                <li><strong>Architecture</strong> - arm64, x86_64, universal, or noarch</li>
+            </ul>
+        </div>
+
+        <!-- Workflow 12 -->
+        <div class="page-break"></div>
+        <h2 id="workflow-12">12. Generate EA Workflow</h2>
+        <div class="description">
+            <p>Automated generation of Extension Attributes with configuration checks.</p>
+        </div>
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TD
+    Start([_generate_ea_and_recipe]) --> CheckCatalogItem{current_catalog_item Exists?}
+    CheckCatalogItem -->|No| ReturnEarly[Return Early]
+    CheckCatalogItem -->|Yes| ImportModules[Import Generators]
+    ImportModules --> CleanName[Clean Munki Name]
+    CleanName --> CreateFolder[Create Munki Folder]
+    CreateFolder --> CheckEAEnabled{EA Creation Enabled?}
+    CheckEAEnabled -->|No| LogEADisabled[Log: EA disabled]
+    CheckEAEnabled -->|Yes| InitEAGen[Initialize EA Generator]
+    InitEAGen --> GenerateEA[Generate Extension Attribute]
+    GenerateEA --> CheckEAResult{EA Generated?}
+    CheckEAResult -->|Yes| StoreEAPath[Store EA Path]
+    CheckEAResult -->|No| CheckRecipeEnabled
+    StoreEAPath --> LogEASuccess[Log: EA Generated]
+    LogEASuccess --> CheckRecipeEnabled{Recipe Creation Enabled?}
+    LogEADisabled --> CheckRecipeEnabled
+    CheckRecipeEnabled -->|No| LogRecipeDisabled[Log: Recipe disabled]
+    LogRecipeDisabled --> End([End])
+    CheckRecipeEnabled -->|Yes| CheckRecipeExists[Check if Recipe Exists]
+    CheckRecipeExists --> RecipeExists{Recipe Exists?}
+    RecipeExists -->|Yes & EA| UpdateWithEA[Update Recipe with EA]
+    UpdateWithEA --> LogUpdated[Log: Updated]
+    LogUpdated --> End
+    RecipeExists -->|Yes & No EA| LogRecipeExists[Log: Exists]
+    LogRecipeExists --> End
+    RecipeExists -->|No| LogGenerating[Log: Generating]
+    LogGenerating --> CheckIcon[Check for Icon]
+    CheckIcon --> GenerateRecipe[Generate Recipe]
+    GenerateRecipe --> CheckRecipeResult{Generated?}
+    CheckRecipeResult -->|Yes| LogRecipeSuccess[Log: Success]
+    LogRecipeSuccess --> End
+    CheckRecipeResult -->|No| End
+    ReturnEarly --> End
+
+    style CheckCatalogItem fill:#ffeb9c
+    style CheckEAEnabled fill:#d5e8d4
+    style CheckRecipeEnabled fill:#d5e8d4
+    style RecipeExists fill:#ffeb9c
+            </div>
+        </div>
+        <div class="features">
+            <strong>Smart Features:</strong>
+            <ul>
+                <li><strong>Configuration Checks</strong> - Respects enable/disable settings</li>
+                <li><strong>Existence Detection</strong> - Detects existing recipes</li>
+                <li><strong>Merge Support</strong> - Updates existing recipe with EA</li>
+                <li><strong>Icon Detection</strong> - Automatically includes if found</li>
+            </ul>
+        </div>
+
+        <!-- Summary -->
+        <div class="page-break"></div>
+        <div class="summary">
+            <h2>📊 Summary</h2>
+            <p>These flowcharts document the complete workflow architecture of the AutoUpdateTester system. The system supports two primary installation methods:</p>
+
+            <h3>Manual Installation</h3>
+            <ul>
+                <li>User-driven installation process</li>
+                <li>Real-time security monitoring</li>
+                <li>Interactive profile generation</li>
+                <li>Manual cleanup required</li>
+            </ul>
+
+            <h3>Munki Local Installation</h3>
+            <ul>
+                <li>Automated installation via Munki</li>
+                <li>System state comparison</li>
+                <li>Automatic profile detection</li>
+                <li>Automated cleanup</li>
+            </ul>
+
+            <h3>Key Features Across All Workflows</h3>
+            <ul>
+                <li><strong>Configuration Profile Generation</strong> - PPPC, Notifications, System Extensions, etc.</li>
+                <li><strong>Extension Attribute Generation</strong> - Version tracking scripts</li>
+                <li><strong>Security Monitoring</strong> - Real-time event tracking</li>
+                <li><strong>System State Comparison</strong> - Before/after analysis</li>
+                <li><strong>Smart De-duplication</strong> - Prevents duplicate profiles</li>
+                <li><strong>Team Consolidation</strong> - Groups related apps by Team ID</li>
+                <li><strong>Interactive Menus</strong> - User-friendly selection interfaces</li>
+                <li><strong>Comprehensive Reporting</strong> - Detailed markdown reports</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p><strong>Document Version:</strong> 1.0</p>
+            <p><strong>Last Updated:</strong> February 26, 2026</p>
+            <p><strong>Source File:</strong> <code>src/core/auto_update_tester.py</code></p>
+            <p><strong>To save as PDF:</strong> Open this file in a web browser (Chrome, Safari, Edge) and use File → Print → Save as PDF</p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
