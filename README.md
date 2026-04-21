@@ -10,7 +10,7 @@
 
 ## About
 
-This repository contains the resources for the MacAD.UK 2026 talk *"Trust, but Verify"*. The session walks through building an automated verification workflow for macOS software titles before deploying them to your fleet via [Jamf Auto Update](https://datajar.co.uk/products/jamf-auto-update).
+This repository contains the resources for the MacAD.UK 2026 talk *"Trust, but Verify"*. The session walks through building an automated verification workflow for macOS software titles before deploying them to your fleet.
 
 ---
 
@@ -55,5 +55,9 @@ This repository contains the resources for the MacAD.UK 2026 talk *"Trust, but V
 
 | Tool | Description | Link |
 |------|-------------|------|
+| **Munki** | Open-source macOS software management | [github.com/munki/munki](https://github.com/munki/munki) |
+| **AutoPkg** | Automated macOS software packaging | [github.com/autopkg/autopkg](https://github.com/autopkg/autopkg) |
+| **pkgcheck** | macOS installer package analysis and validation | [github.com/scriptingosx/pkgcheck](https://github.com/scriptingosx/pkgcheck) |
+| **VirusTotalReporter** | AutoPkg processor for VirusTotal scanning of downloads | [github.com/autopkg/nstrauss-recipes](https://github.com/autopkg/nstrauss-recipes/tree/master/VirusTotalReporter) |
 | **Jamf Auto Update** | Automated app packaging and deployment | [datajar.co.uk/products/jamf-auto-update](https://datajar.co.uk/products/jamf-auto-update) |
 | **Objective-See** | Free macOS security tools by Patrick Wardle | [objective-see.org](https://objective-see.org) |
