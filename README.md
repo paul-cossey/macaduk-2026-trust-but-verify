@@ -14,6 +14,36 @@ This repository contains the resources for the MacAD.UK 2026 talk *"Trust, but V
 
 ---
 
+## Repository Structure
+
+```
+├── InstallAudit/          # The verification tool (see InstallAudit/ReadMe.md)
+├── create_pptx.py         # Generates the presentation slides
+├── generate_pptx.sh       # Shell wrapper to set up venv and run create_pptx.py
+├── generate_spy_duck_gif.py
+├── requirements.txt       # Python dependencies for slide generation (python-pptx, lxml)
+└── README.md              # This file
+```
+
+### Running InstallAudit
+
+```bash
+cd InstallAudit
+python3 configure.py --edit   # Configure API keys and preferences
+sudo python3 main.py          # Run the verification workflow
+```
+
+See [`InstallAudit/ReadMe.md`](InstallAudit/ReadMe.md) for full documentation.
+
+### Regenerating the Presentation
+
+```bash
+pip3 install -r requirements.txt
+python3 create_pptx.py
+```
+
+---
+
 ## Links & Resources
 
 ### Security Scanning
