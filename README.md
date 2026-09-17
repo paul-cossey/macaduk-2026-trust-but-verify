@@ -38,6 +38,9 @@ See [`InstallAudit/ReadMe.md`](InstallAudit/ReadMe.md) for full documentation.
 ### Regenerating the Presentation
 
 ```bash
+cd macaduk-2026-trust-but-verify
+python3 -m venv env
+source env/bin/activate
 pip3 install -r requirements.txt
 python3 create_pptx.py
 ```
